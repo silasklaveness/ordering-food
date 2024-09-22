@@ -51,7 +51,7 @@ export default function EditMenuItemPage() {
     await toast.promise(savingPromise, {
       loading: "Saving...",
       success: "Item saved!",
-      error: "Error!",
+      error: "Error saving the item!",
     });
 
     setRedirectToItems(true);
@@ -72,7 +72,7 @@ export default function EditMenuItemPage() {
     await toast.promise(promise, {
       loading: "Deleting...",
       success: "Item deleted!",
-      error: "Error!",
+      error: "Error deleting the item!",
     });
 
     setRedirectToItems(true);
@@ -117,6 +117,7 @@ export default function EditMenuItemPage() {
               </Button>
             </Link>
           </div>
+          {/* Menu Item Form */}
           {menuItem && (
             <MenuItemForm menuItem={menuItem} onSubmit={handleFormSubmit} />
           )}

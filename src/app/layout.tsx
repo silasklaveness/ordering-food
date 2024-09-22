@@ -7,6 +7,7 @@ import AppProvider from "@/components/AppContext";
 import Header from "@/components/layout/Header";
 import { Toaster } from "react-hot-toast";
 import { Analytics } from "@vercel/analytics/react";
+import RestaurantSelector from "@/components/layout/RestaurantSelector";
 
 const roboto = Roboto({ subsets: ["latin"], weight: ["400", "500", "700"] });
 

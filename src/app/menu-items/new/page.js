@@ -2,35 +2,28 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { UseProfile } from "@/components/UseProfile";
 import UserTabs from "@/components/layout/UserTabs";
 import MenuItemForm from "@/components/layout/MenuItemForm";
 import Link from "next/link";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, PlusCircle } from "lucide-react";
 
 export default function NewMenuItemPage() {
-  console.log("NewMenuItemPage is rendering...");
-
   const router = useRouter();
   const [redirectToItems, setRedirectToItems] = useState(false);
-  const { loading, data } = UseProfile();
 
-  useEffect(() => {
-    console.log("loading:", loading);
-    console.log("data:", data);
-  }, [loading, data]);
-
-  async function handleFormSubmit(ev, data) {
+  // Form submit handler
+  async function handleFormSubmit(ev, formData) {
     ev.preventDefault();
-    console.log("Form submitted with data:", data);
 
     const savingPromise = new Promise(async (resolve, reject) => {
       const response = await fetch("/api/menu-items", {
         method: "POST",
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...formData, // Form data includes restaurants from MenuItemForm
+        }),
         headers: { "Content-Type": "application/json" },
       });
       if (response.ok) resolve();
@@ -38,34 +31,17 @@ export default function NewMenuItemPage() {
     });
 
     await toast.promise(savingPromise, {
-      loading: "Saving this tasty item",
-      success: "Saved",
-      error: "Error",
+      loading: "Saving this tasty item...",
+      success: "Item saved successfully!",
+      error: "Error saving item",
     });
 
     setRedirectToItems(true);
-    router.push("/menu-items"); // Redirect manually
+    router.push("/menu-items");
   }
 
   if (redirectToItems) {
-    console.log("Redirecting to /menu-items...");
-    return null; // Redirection is handled by router.push
-  }
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-      </div>
-    );
-  }
-
-  if (!data || !data.admin) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="text-2xl font-bold text-red-500">Not an admin.</div>
-      </div>
-    );
+    return null; // Redirection handled by router.push
   }
 
   return (
@@ -87,7 +63,9 @@ export default function NewMenuItemPage() {
               </Button>
             </Link>
           </div>
-          <MenuItemForm menuItem={null} onSubmit={handleFormSubmit} />
+
+          {/* MenuItemForm component (which already includes restaurant selection logic) */}
+          <MenuItemForm onSubmit={handleFormSubmit} />
         </CardContent>
       </Card>
     </section>

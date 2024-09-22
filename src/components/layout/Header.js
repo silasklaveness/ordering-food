@@ -4,7 +4,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useContext, useState, useEffect } from "react";
 import { CartContext } from "../AppContext";
-import { RestaurantContext } from "../RestaurantContext"; // Import RestaurantContext
+import { RestaurantContext } from "../RestaurantContext";
 import ShoppingCart from "../icons/ShoppingCart";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -14,11 +14,12 @@ import {
   User,
   Menu,
   X,
-  MapPin,
+  UserIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import RestaurantSelector from "./RestaurantSelector";
 
 function useScrollDirection() {
   const [scrollDirection, setScrollDirection] = useState("up");
@@ -52,8 +53,7 @@ export default function LuxuriousHeader() {
   const userData = session?.user;
   let userName = userData?.name || userData?.email;
   const { cartProducts } = useContext(CartContext);
-  const { selectedRestaurant, setSelectedRestaurant } =
-    useContext(RestaurantContext);
+  const { selectedRestaurant } = useContext(RestaurantContext);
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
@@ -92,8 +92,13 @@ export default function LuxuriousHeader() {
     open: { opacity: 1, x: 0 },
   };
 
+  // Determine if current page is the homepage or a restaurant page
   const isHomePage = pathname === "/";
-  const isTransparent = isHomePage && !isScrolled;
+  const isRestaurantPage =
+    pathname === "/tolvsrod" || pathname === "/teie" || pathname === "/sentrum";
+
+  // Apply transparency logic to both the homepage and restaurant pages
+  const isTransparent = (isHomePage || isRestaurantPage) && !isScrolled;
   const isMenuPage = pathname === "/menu";
 
   const hiddenPages = [
@@ -103,6 +108,7 @@ export default function LuxuriousHeader() {
     "/users",
     "/orders",
     "/oversikt",
+    "/restaurants",
   ];
   const shouldHideHeader = hiddenPages.some((page) =>
     pathname.startsWith(page)
@@ -126,9 +132,12 @@ export default function LuxuriousHeader() {
       transition={{ duration: 0.3 }}
     >
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between relative">
+        {/* Logo */}
         <Link href="/" className="z-10 relative">
           <Image src="/logo.png" alt="Tønsberg Pizza" width={100} height={50} />
         </Link>
+
+        {/* Navigation Items for Larger Screens */}
         <div className="hidden md:flex items-center gap-6">
           {navItems.map((item) => (
             <Link
@@ -144,33 +153,25 @@ export default function LuxuriousHeader() {
             </Link>
           ))}
         </div>
+
+        {/* Middle content - RestaurantSelector on Mobile */}
+        <div className="flex-1 flex items-center justify-center md:hidden">
+          <motion.div className="relative" whileHover={{ scale: 1.05 }}>
+            <RestaurantSelector />
+          </motion.div>
+        </div>
+
+        {/* Right content */}
         <div className="flex items-center gap-4">
+          {/* RestaurantSelector on Larger Screens */}
           <motion.div
             className="relative hidden md:block"
             whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
           >
-            <select
-              className={`appearance-none font-bold pr-8 pl-2 py-2 rounded cursor-pointer transition-all duration-300 outline-none border ${
-                isTransparent && !isOpen
-                  ? "bg-white text-black border-white"
-                  : "bg-white text-black border-gray-300"
-              }`}
-              value={selectedRestaurant}
-              onChange={(e) => setSelectedRestaurant(e.target.value)} // Update selectedRestaurant
-              aria-label="Select location"
-            >
-              <option value="Tolvsrød">Tolvsrød</option>
-              <option value="Sentrum">Sentrum</option>
-              <option value="Teie">Teie</option>
-            </select>
-            <MapPin
-              className={`absolute right-2 top-1/2 transform -translate-y-1/2 pointer-events-none ${
-                isTransparent && !isOpen ? "text-black" : "text-black"
-              }`}
-              size={18}
-            />
+            <RestaurantSelector />
           </motion.div>
+
+          {/* Cart Icon */}
           <Link
             href="/cart"
             className={`transition-colors relative ${
@@ -191,6 +192,8 @@ export default function LuxuriousHeader() {
               </motion.span>
             )}
           </Link>
+
+          {/* Authentication Buttons */}
           <div className="hidden md:block">
             {status === "authenticated" ? (
               <div className="flex items-center gap-2">
@@ -232,6 +235,8 @@ export default function LuxuriousHeader() {
               </div>
             )}
           </div>
+
+          {/* Mobile Menu Toggle */}
           <button
             className={`md:hidden transition-colors ${
               isTransparent && !isOpen
@@ -245,6 +250,8 @@ export default function LuxuriousHeader() {
           </button>
         </div>
       </nav>
+
+      {/* Mobile Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -267,18 +274,8 @@ export default function LuxuriousHeader() {
                 </Link>
               ))}
 
-              <div className="mt-6 w-full">
-                <select
-                  className="w-full bg-white text-orange-500 font-bold py-2 px-4 rounded-full cursor-pointer transition-all duration-300 outline-none border border-orange-400"
-                  value={selectedRestaurant}
-                  onChange={(e) => setSelectedRestaurant(e.target.value)} // Update selectedRestaurant in mobile
-                  aria-label="Select location"
-                >
-                  <option value="Tolvsrød">Tolvsrød</option>
-                  <option value="Sentrum">Sentrum</option>
-                  <option value="Teie">Teie</option>
-                </select>
-              </div>
+              {/* RestaurantSelector in Mobile Menu */}
+              <RestaurantSelector />
             </div>
 
             <div className="flex flex-col w-full mt-8 space-y-6">
@@ -287,9 +284,9 @@ export default function LuxuriousHeader() {
                   <Link
                     href="/profile"
                     onClick={closeMenu}
-                    className="text-2xl font-semibold text-white hover:text-gray-300 transition-colors"
+                    className="text-2xl font-semibold text-white hover:text-gray-300 transition-colors flex items-center gap-2"
                   >
-                    {userName}
+                    <span>{userName}</span> <UserIcon />
                   </Link>
                   <Button
                     onClick={() => {

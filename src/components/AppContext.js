@@ -66,19 +66,17 @@ export default function AppProvider({ children }) {
 
   return (
     <SessionProvider>
-      <RestaurantProvider>
-        <CartContext.Provider
-          value={{
-            cartProducts,
-            setCartProducts,
-            addToCart,
-            removeCartProduct,
-            clearCart,
-          }}
-        >
-          {children}
-        </CartContext.Provider>
-      </RestaurantProvider>
+      <CartContext.Provider
+        value={{
+          cartProducts,
+          setCartProducts,
+          addToCart,
+          removeCartProduct,
+          clearCart,
+        }}
+      >
+        <RestaurantProvider>{children}</RestaurantProvider>
+      </CartContext.Provider>
     </SessionProvider>
   );
 }

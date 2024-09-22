@@ -17,6 +17,7 @@ export async function GET(req) {
     const endDate = url.searchParams.get("endDate");
     const paid = url.searchParams.get("paid"); // Added for filtering paid/unpaid orders
     const status = url.searchParams.get("status"); // Added for filtering by status
+    const restaurant = url.searchParams.get("restaurant"); // Added for filtering by restaurant
 
     // Initialize filter object
     let filter = {};
@@ -75,6 +76,11 @@ export async function GET(req) {
     // Apply status filter if provided
     if (status) {
       filter.status = status;
+    }
+
+    // Apply restaurant filter if provided
+    if (restaurant) {
+      filter.restaurant = restaurant;
     }
 
     // If the user is not an admin, restrict the query to their own orders

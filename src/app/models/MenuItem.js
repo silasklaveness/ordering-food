@@ -23,6 +23,12 @@ const MenuItemSchema = new Schema(
     basePrice: { type: Number },
     sizes: { type: [ExtraPriceSchema] },
     extraIngredientsPrices: { type: [ExtraPriceSchema] },
+    restaurants: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Restaurant", // Ensure this references the Restaurant schema
+      },
+    ],
   },
   { timestamps: true }
 );

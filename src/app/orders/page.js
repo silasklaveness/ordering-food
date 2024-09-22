@@ -1,3 +1,5 @@
+// OrdersPage.js
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -26,15 +28,18 @@ import {
   List,
   Maximize,
   Minimize,
-} from "lucide-react"; // Removed FullscreenExit
+} from "lucide-react";
 import { dbTimeForHuman } from "@/libs/datetime";
 import { Input } from "@/components/ui/input";
 import { toast } from "react-hot-toast";
+import { Select } from "@/components/ui/select"; // Import your Select component
+import { useRouter } from "next/navigation";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const { loading, data: profile } = UseProfile();
+  const router = useRouter();
 
   const today = new Date().toISOString().split("T")[0];
   const [startDate, setStartDate] = useState(today);
@@ -47,13 +52,36 @@ export default function OrdersPage() {
   const [viewMode, setViewMode] = useState("table"); // "table" or "card"
   const [isFullScreen, setIsFullScreen] = useState(false);
 
+  // New state for selected restaurant and list of restaurants
+  const [selectedRestaurant, setSelectedRestaurant] = useState("");
+  const [restaurants, setRestaurants] = useState([]);
+
+  useEffect(() => {
+    // Fetch the list of restaurants
+    fetch("/api/restaurants")
+      .then((res) => res.json())
+      .then((data) => setRestaurants(data))
+      .catch((error) => {
+        console.error("Error fetching restaurants:", error);
+        toast.error("Failed to load restaurants");
+      });
+  }, []);
+
   useEffect(() => {
     fetchOrders();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startDate, endDate, isDateRange, showUnpaid, showDone, viewMode]);
+  }, [
+    startDate,
+    endDate,
+    isDateRange,
+    showUnpaid,
+    showDone,
+    viewMode,
+    selectedRestaurant,
+  ]);
 
   /**
-   * Fetch orders based on filters (showDone, showUnpaid, date range).
+   * Fetch orders based on filters (showDone, showUnpaid, date range, selectedRestaurant).
    */
   async function fetchOrders() {
     setLoadingOrders(true);
@@ -79,6 +107,11 @@ export default function OrdersPage() {
       } else {
         queryParams.append("paid", false); // Show unpaid orders
       }
+    }
+
+    // Filter by selected restaurant if any
+    if (selectedRestaurant) {
+      queryParams.append("restaurant", selectedRestaurant);
     }
 
     try {
@@ -230,6 +263,26 @@ export default function OrdersPage() {
                       {isDateRange ? "Select Single Date" : "Select Date Range"}
                     </Button>
                   )}
+                  {/* Restaurant Selector */}
+                  {profile.admin && (
+                    <div className="flex flex-col">
+                      <label className="block text-sm font-medium text-gray-700">
+                        Restaurant
+                      </label>
+                      <select
+                        value={selectedRestaurant}
+                        onChange={(e) => setSelectedRestaurant(e.target.value)}
+                        className="mt-1 border-gray-300 focus:ring-primary focus:border-primary rounded-md shadow-sm"
+                      >
+                        <option value="">All Restaurants</option>
+                        {restaurants.map((restaurant) => (
+                          <option key={restaurant._id} value={restaurant.name}>
+                            {restaurant.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
 
                 {/* Filters and View Toggles */}
@@ -292,6 +345,7 @@ export default function OrdersPage() {
                         <TableHeader>
                           <TableRow>
                             <TableHead>Status</TableHead>
+                            <TableHead>Restaurant</TableHead>
                             <TableHead>Type</TableHead>
                             <TableHead>Customer</TableHead>
                             <TableHead>Date</TableHead>
@@ -325,6 +379,7 @@ export default function OrdersPage() {
                                   ></div>
                                 </div>
                               </TableCell>
+                              <TableCell>{order.restaurant || "N/A"}</TableCell>
                               <TableCell>
                                 <div className="flex items-center space-x-2">
                                   {order.scheduledTime && (
@@ -416,6 +471,10 @@ export default function OrdersPage() {
                             </div>
                           </CardHeader>
                           <CardContent>
+                            <p>
+                              <strong>Restaurant:</strong>{" "}
+                              {order.restaurant || "N/A"}
+                            </p>
                             <p>
                               <strong>Customer:</strong> {order.name || "N/A"}
                             </p>

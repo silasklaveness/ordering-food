@@ -20,10 +20,12 @@ import {
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { RestaurantContext } from "@/components/RestaurantContext";
 
 export default function CartPage() {
   const { cartProducts, removeCartProduct, setCartProducts } =
     useContext(CartContext);
+  const { selectedRestaurant } = useContext(RestaurantContext);
   const [address, setAddress] = useState({});
   const { data: profileData } = UseProfile();
   const [step, setStep] = useState("summary");
@@ -36,6 +38,7 @@ export default function CartPage() {
   const [scheduledDate, setScheduledDate] = useState("");
   const [scheduledTime, setScheduledTime] = useState("");
   const [isScheduling, setIsScheduling] = useState(false);
+  const [canProceed, setCanProceed] = useState(true);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -200,6 +203,11 @@ export default function CartPage() {
   async function proceedToCheckout(ev) {
     ev.preventDefault();
 
+    if (!canProceed) {
+      toast.error("Adressen er for lang unna restauranten.");
+      return;
+    }
+
     if (!isWithinOpeningHours && !scheduledTime) {
       toast.error("Vi er stengt. Enten kom tilbake eller bestill for senere.");
       return;
@@ -234,6 +242,7 @@ export default function CartPage() {
           name,
           email,
           scheduledTime: scheduledTime ? scheduledTime.toISOString() : null,
+          selectedRestaurant,
         }),
       }).then(async (response) => {
         if (response.ok) {
@@ -300,10 +309,13 @@ export default function CartPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="mt-20 sm:mt-[140px] px-4 max-w-2xl mx-auto"
+      className="mt-20 sm:mt-[190px] px-4 max-w-2xl mx-auto"
     >
       <div className="text-center mb-6 sm:mb-8">
-        <SectionHeaders mainHeader="Your cart" />
+        <SectionHeaders
+          mainHeader="Din handlekurv"
+          subHeader={selectedRestaurant}
+        />
       </div>
 
       <AnimatePresence mode="wait">
@@ -514,6 +526,8 @@ export default function CartPage() {
                 setName={setName}
                 email={email}
                 setEmail={setEmail}
+                selectedRestaurant={selectedRestaurant}
+                setCanProceed={setCanProceed}
               />
               {scheduledTime && (
                 <div className="mt-4">

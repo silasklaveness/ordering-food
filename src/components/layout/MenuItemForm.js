@@ -29,6 +29,10 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
   const [extraIngredientsPrices, setExtraIngredientPrices] = useState(
     menuItem?.extraIngredientsPrices || []
   );
+  const [restaurants, setRestaurants] = useState([]); // All restaurants
+  const [selectedRestaurants, setSelectedRestaurants] = useState(
+    menuItem?.restaurants || [] // Pre-selected restaurants
+  );
 
   // Fetch categories from the backend
   useEffect(() => {
@@ -36,6 +40,15 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
       .then((res) => res.json())
       .then((data) => {
         setCategories(data);
+      });
+  }, []);
+
+  // Fetch restaurants from the backend
+  useEffect(() => {
+    fetch("/api/restaurants")
+      .then((res) => res.json())
+      .then((data) => {
+        setRestaurants(data);
       });
   }, []);
 
@@ -54,6 +67,17 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
     // Ensure subCategory is set to the current subcategory if editing an existing item
     setSubCategory(menuItem?.subcategory || "");
   }, [category, categories, menuItem]);
+
+  // Handle adding or removing restaurants from the selected list
+  function handleRestaurantSelect(restaurantId) {
+    setSelectedRestaurants((prevSelected) => {
+      if (prevSelected.includes(restaurantId)) {
+        return prevSelected.filter((id) => id !== restaurantId); // Remove if already selected
+      } else {
+        return [...prevSelected, restaurantId]; // Add if not selected
+      }
+    });
+  }
 
   return (
     <Card className="w-full max-w-2xl mx-auto mt-8">
@@ -74,6 +98,7 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
               extraIngredientsPrices,
               category, // Pass the main category
               subcategory: subCategory, // Pass the subcategory
+              restaurants: selectedRestaurants, // Pass selected restaurants
             })
           }
           className="space-y-8"
@@ -148,6 +173,34 @@ export default function MenuItemForm({ onSubmit, menuItem }) {
                   onChange={(ev) => setBasePrice(ev.target.value)}
                 />
               </div>
+            </div>
+          </div>
+
+          {/* Restaurant selection */}
+          <div className="space-y-2">
+            <Label>Available in Restaurants</Label>
+            <div className="space-y-2">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={selectedRestaurants.length === 0} // If no specific restaurants, assume "All"
+                  onChange={() => setSelectedRestaurants([])} // Reset to "All"
+                />
+                <span>All Restaurants</span>
+              </label>
+              {restaurants.map((restaurant) => (
+                <label
+                  key={restaurant._id}
+                  className="flex items-center space-x-2"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedRestaurants.includes(restaurant._id)}
+                    onChange={() => handleRestaurantSelect(restaurant._id)}
+                  />
+                  <span>{restaurant.name}</span>
+                </label>
+              ))}
             </div>
           </div>
 

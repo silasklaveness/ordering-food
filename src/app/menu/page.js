@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { RestaurantContext } from "@/components/RestaurantContext"; // Import the RestaurantContext
 import SectionHeaders from "@/components/layout/SectionHeaders";
 import MenyItem from "@/components/meny/MenyItem";
 import { motion } from "framer-motion";
@@ -8,17 +9,35 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 
 export default function MenuPage() {
+  const { selectedRestaurant } = useContext(RestaurantContext); // Get selected restaurant from context
   const [categories, setCategories] = useState([]);
   const [menuItems, setMenuItems] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
+  const [restaurants, setRestaurants] = useState([]);
+  const [restaurantId, setRestaurantId] = useState(""); // Store the selected restaurant ObjectId
   const [activeCategory, setActiveCategory] = useState("");
   const [subCategories, setSubCategories] = useState([]);
   const [activeFilter, setActiveFilter] = useState("Alle");
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Fetch categories and menu items
+  // Fetch restaurants, categories, and menu items
   useEffect(() => {
-    fetch("api/categories").then((res) => {
+    // Fetch all restaurants
+    fetch("/api/restaurants").then((res) => {
+      res.json().then((restaurants) => {
+        setRestaurants(restaurants);
+        // Find the ObjectId of the selected restaurant based on its name
+        const selectedRestaurantObj = restaurants.find(
+          (r) => r.name.toLowerCase() === selectedRestaurant.toLowerCase()
+        );
+        if (selectedRestaurantObj) {
+          setRestaurantId(selectedRestaurantObj._id);
+        }
+      });
+    });
+
+    // Fetch categories
+    fetch("/api/categories").then((res) => {
       res.json().then((categories) => {
         setCategories(categories);
         if (categories.length > 0) {
@@ -27,26 +46,39 @@ export default function MenuPage() {
         }
       });
     });
-    fetch("api/menu-items").then((res) => {
+
+    // Fetch menu items
+    fetch("/api/menu-items").then((res) => {
       res.json().then((menuItems) => {
         setMenuItems(menuItems);
-        setFilteredItems(menuItems); // Initially show all items
       });
     });
-  }, []);
+  }, [selectedRestaurant]);
 
   // Filter menu items whenever category, subcategory (filter), or search term changes
   useEffect(() => {
+    if (!restaurantId) return;
+
     let filtered = menuItems;
 
+    // Filter by selected restaurant (based on ObjectId)
+    filtered = filtered.filter(
+      (item) =>
+        item.restaurants.includes(restaurantId) || // Check if item is available at the selected restaurant
+        item.restaurants.length === 0 // If no restaurants are specified, it's available everywhere
+    );
+
+    // Filter by active category
     if (activeCategory) {
       filtered = filtered.filter((item) => item.category === activeCategory);
     }
 
+    // Filter by subcategory
     if (activeFilter !== "Alle") {
       filtered = filtered.filter((item) => item.subcategory === activeFilter);
     }
 
+    // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(
         (item) =>
@@ -57,7 +89,7 @@ export default function MenuPage() {
     }
 
     setFilteredItems(filtered);
-  }, [activeCategory, activeFilter, searchTerm, menuItems]);
+  }, [restaurantId, activeCategory, activeFilter, searchTerm, menuItems]);
 
   // Handle category change
   const handleCategoryChange = (categoryId) => {

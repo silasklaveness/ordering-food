@@ -19,7 +19,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function MenuItemsPage() {
-  const [menuItems, setMenuItems] = useState([]);
+  const [menuItems, setMenuItems] = useState([]); // Ensure menuItems is initialized as an array
   const [categories, setCategories] = useState([]);
   const [filteredItems, setFilteredItems] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,32 +28,56 @@ export default function MenuItemsPage() {
   const { loading, data } = UseProfile();
 
   useEffect(() => {
-    fetch("/api/menu-items").then((res) =>
-      res.json().then((menuItems) => {
-        setMenuItems(menuItems);
-        setFilteredItems(menuItems);
+    fetch("/api/menu-items")
+      .then((res) => res.json())
+      .then((menuItems) => {
+        // Log the fetched menuItems to check the data
+        console.log("Fetched menu items:", menuItems);
+        if (Array.isArray(menuItems)) {
+          setMenuItems(menuItems);
+          setFilteredItems(menuItems);
+        } else {
+          setMenuItems([]);
+          setFilteredItems([]);
+        }
       })
-    );
+      .catch((err) => {
+        console.error("Error fetching menu items:", err);
+        setMenuItems([]); // Fallback in case of an error
+        setFilteredItems([]); // Fallback in case of an error
+      });
 
-    fetch("/api/categories").then((res) =>
-      res.json().then((categories) => {
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then((categories) => {
+        console.log("Fetched categories:", categories);
         setCategories(categories);
       })
-    );
+      .catch((err) => {
+        console.error("Error fetching categories:", err);
+        setCategories([]); // Fallback in case of an error
+      });
   }, []);
 
   useEffect(() => {
     const filtered = menuItems.filter((item) => {
       const matchesSearch = item.name
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(searchTerm.toLowerCase());
+
       const matchesCategory =
-        selectedCategory === "all" || item.category === selectedCategory;
+        selectedCategory === "all" ||
+        item.category?._id === selectedCategory ||
+        item.category === selectedCategory;
+
       const matchesSubcategory =
         selectedSubcategory === "all" ||
+        item.subcategory?._id === selectedSubcategory ||
         item.subcategory === selectedSubcategory;
+
       return matchesSearch && matchesCategory && matchesSubcategory;
     });
+
     setFilteredItems(filtered);
   }, [menuItems, searchTerm, selectedCategory, selectedSubcategory]);
 
@@ -157,44 +181,50 @@ export default function MenuItemsPage() {
                   className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
                   layout
                 >
-                  {filteredItems.map((item) => (
-                    <motion.div
-                      key={item._id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Link href={`/menu-items/edit/${item._id}`}>
-                        <Card className="hover:shadow-lg transition-shadow duration-200">
-                          <CardContent className="p-4">
-                            <div className="relative aspect-square mb-2">
-                              <Image
-                                className="rounded-md object-cover"
-                                src={item.image}
-                                alt={item.name}
-                                layout="fill"
-                              />
-                            </div>
-                            <h3 className="text-center font-medium text-lg mb-2">
-                              {item.name}
-                            </h3>
-                            <p className="text-sm text-gray-500 mb-2 line-clamp-2">
-                              {item.description}
-                            </p>
-                            <p className="text-sm font-semibold mb-2">
-                              {item.basePrice} KR
-                            </p>
-                            <Button variant="outline" className="w-full">
-                              <Edit2 className="w-4 h-4 mr-2" />
-                              Edit
-                            </Button>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </motion.div>
-                  ))}
+                  {filteredItems.length > 0 ? (
+                    filteredItems.map((item) => (
+                      <motion.div
+                        key={item._id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.9 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <Link href={`/menu-items/edit/${item._id}`}>
+                          <Card className="hover:shadow-lg transition-shadow duration-200">
+                            <CardContent className="p-4">
+                              <div className="relative aspect-square mb-2">
+                                <Image
+                                  className="rounded-md object-cover"
+                                  src={item.image}
+                                  alt={item.name}
+                                  layout="fill"
+                                />
+                              </div>
+                              <h3 className="text-center font-medium text-lg mb-2">
+                                {item.name}
+                              </h3>
+                              <p className="text-sm text-gray-500 mb-2 line-clamp-2">
+                                {item.description}
+                              </p>
+                              <p className="text-sm font-semibold mb-2">
+                                {item.basePrice} KR
+                              </p>
+                              <Button variant="outline" className="w-full">
+                                <Edit2 className="w-4 h-4 mr-2" />
+                                Edit
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </Link>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <p className="text-center col-span-full text-gray-500">
+                      No menu items found.
+                    </p>
+                  )}
                 </motion.div>
               </AnimatePresence>
             </div>

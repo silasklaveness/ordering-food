@@ -17,6 +17,7 @@ const OrderSchema = new Schema(
       enum: ["delivery", "pickup"],
       required: true,
     },
+    restaurant: { type: String, required: true }, // Corrected syntax here
     status: { type: String, enum: ["pending", "done"], default: "pending" },
   },
   { timestamps: true }

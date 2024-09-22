@@ -19,12 +19,9 @@ export default function Footer() {
           {/* Restaurant Info */}
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">
-              Gourmet Delights
+              Tønsberg Pizza
             </h3>
-            <p className="mb-4">
-              Experience culinary excellence with our diverse menu and
-              exceptional service.
-            </p>
+            <p className="mb-4"></p>
             <div className="flex space-x-4">
               <a
                 href="https://facebook.com"
@@ -55,13 +52,11 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white text-lg font-semibold mb-4">
-              Quick Links
-            </h3>
+            <h3 className="text-white text-lg font-semibold mb-4">Sider</h3>
             <ul className="space-y-2">
               <li>
                 <Link href="/" className="hover:text-white transition-colors">
-                  Home
+                  Hjem
                 </Link>
               </li>
               <li>
@@ -69,31 +64,7 @@ export default function Footer() {
                   href="/menu"
                   className="hover:text-white transition-colors"
                 >
-                  Menu
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/reservations"
-                  className="hover:text-white transition-colors"
-                >
-                  Reservations
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/about"
-                  className="hover:text-white transition-colors"
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/contact"
-                  className="hover:text-white transition-colors"
-                >
-                  Contact
+                  Meny
                 </Link>
               </li>
             </ul>
@@ -102,12 +73,12 @@ export default function Footer() {
           {/* Customer Services */}
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">
-              Customer Services
+              Kundeservice
             </h3>
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/account/login"
+                  href="/login"
                   className="hover:text-white transition-colors"
                 >
                   Login
@@ -115,18 +86,18 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/account/register"
+                  href="register"
                   className="hover:text-white transition-colors"
                 >
-                  Register
+                  Registrer
                 </Link>
               </li>
               <li>
                 <Link
-                  href="/account/orders"
+                  href="/orders"
                   className="hover:text-white transition-colors"
                 >
-                  Order History
+                  Ordrehistorie
                 </Link>
               </li>
               <li>
@@ -159,7 +130,7 @@ export default function Footer() {
           {/* Contact Information */}
           <div>
             <h3 className="text-white text-lg font-semibold mb-4">
-              Contact Us
+              Kontakt oss
             </h3>
             <ul className="space-y-2">
               <li className="flex items-center">

@@ -38,6 +38,7 @@ const iconMap = {
   Users: Users,
   Orders: ShoppingBag,
   Oversikt: BarChart3,
+  Restaurants: Coffee,
 };
 
 export default function AdminNavbar({ isAdmin = false }) {
@@ -64,6 +65,7 @@ export default function AdminNavbar({ isAdmin = false }) {
     { name: "Users", href: "/users", adminOnly: true },
     { name: "Orders", href: "/orders", adminOnly: false },
     { name: "Oversikt", href: "/oversikt", adminOnly: true },
+    { name: "Restaurants", href: "/restaurants", adminOnly: true },
   ];
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);

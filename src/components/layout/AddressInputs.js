@@ -3,7 +3,7 @@ import { useJsApiLoader } from "@react-google-maps/api";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const libraries = ["places"];
+const libraries = ["places", "geometry"];
 
 export default function AddressInputs({ addressProps, setAddressProps }) {
   const autocompleteInputRef = useRef(null); // Ref for the autocomplete field
